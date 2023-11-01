@@ -38,24 +38,38 @@ var baseGroup = new ol.layer.Group({
 });
 map.addLayer(baseGroup)
 
-var add_butuan = new ol.layer.Tile({
-    title:'Butuan',
-    //opacity:1,
+// var add_butuan = new ol.layer.Tile({
+//     title:'Butuan',
+//     //opacity:1,
+//     source:new ol.source.TileWMS({
+//         url: 'http://localhost:8080/geoserver/ITE-18-WEBGIS/wms',
+//         params:{
+//             LAYERS: 'ITE-18-WEBGIS:projected_butuan_PostGIS',
+//             TILED: true},
+//         serverType: 'geoserver',
+//         visible: true
+//     })
+// })
+// map.addLayer(add_butuan)
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+var add_mangroves = new ol.layer.Tile({
+    title:'Mangroves',
+    opacity:0.5,
     source:new ol.source.TileWMS({
         url: 'http://localhost:8080/geoserver/ITE-18-WEBGIS/wms',
         params:{
-            LAYERS: 'ITE-18-WEBGIS:projected_butuan_PostGIS',
+            LAYERS: 'ITE-18-WEBGIS:Mangrove_Philippines_DMA-4326',
             TILED: true},
         serverType: 'geoserver',
         visible: true
     })
 })
-// map.addLayer(add_butuan)
-
+map.addLayer(add_mangroves)
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 var overlayGroup = new ol.layer.Group({
     title: 'Overlays',
     fold:true,
-    layers: [add_butuan]
+    layers: [add_mangroves]
 });
 map.addLayer(overlayGroup);
 
@@ -98,24 +112,53 @@ closer.onclick = function(){
     return false;
 }
 
+// map.on('singleclick', function(e){
+//     if (featureInfoFlag) {
+//         content.innerHTML = '';
+//         var resolution = map.getView().getResolution();
+//         var projection = map.getView().getProjection();
+
+//         var url = add_butuan.getSource().getFeatureInfoUrl(e.coordinate,resolution,projection, {
+//             'INFO_FORMAT': 'application/json',
+//             'propertyName': 'barangay,class,shape_area'
+//         });
+
+//         if (url){
+//             $.getJSON(url,function(data){
+//                 var feature = data.features[0];
+//                 var props = feature.properties;
+//                 content.innerHTML = "<h3> Barangay: </h3> <p>" + props.barangay.toUpperCase() +
+//                 "</p> <br> <h3> Class: </h3> <p>" + props.class + "</p>" +
+//                 "</p> <br> <h3> Area: </h3> <p>" + props.shape_area + "</p>";
+//                 popup.setPosition(e.coordinate);
+//             })
+//         }
+//         else{
+//             popup.setPosition(undefined);
+//         }
+//     }
+// })
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 map.on('singleclick', function(e){
-    if (featureInfoFlag) {
+    if (featureInfoFlag) { 
         content.innerHTML = '';
         var resolution = map.getView().getResolution();
         var projection = map.getView().getProjection();
 
-        var url = add_butuan.getSource().getFeatureInfoUrl(e.coordinate,resolution,projection, {
+        var url = add_mangroves.getSource().getFeatureInfoUrl(e.coordinate,resolution,projection, {
             'INFO_FORMAT': 'application/json',
-            'propertyName': 'barangay,class,shape_area'
+//             'propertyName': 'barangay,class,shape_area'  get all atributes instead
         });
-
+        console.log(url);
         if (url){
             $.getJSON(url,function(data){
                 var feature = data.features[0];
                 var props = feature.properties;
-                content.innerHTML = "<h3> Barangay: </h3> <p>" + props.barangay.toUpperCase() +
-                "</p> <br> <h3> Class: </h3> <p>" + props.class + "</p>" +
-                "</p> <br> <h3> Area: </h3> <p>" + props.shape_area + "</p>";
+                content.innerHTML = 
+                "<h3> LANDCOVER: </h3> <p>" + props.LCOV.toUpperCase() +
+                "</p> <br> <h3> PROVINCE: </h3> <p>" + props.PROVINCE + "</p>" +
+                "</p> <br> <h3> AREA: </h3> <p>" + props.AREA + "</p>" +
+                "</p> <br> <h3> REGION: </h3> <p>" + props.REGION + "</p>";
                 popup.setPosition(e.coordinate);
             })
         }
@@ -124,7 +167,7 @@ map.on('singleclick', function(e){
         }
     }
 })
-
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 var homeButton = document.createElement('button');
 homeButton.innerHTML = '<img src = "images/controls/home.png" alt = "HOME" style= "width:20px;height:20px;filter:brightness(0);vertical-align:middle"></img>';
 homeButton.className = 'myButton';
