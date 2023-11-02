@@ -56,7 +56,7 @@ var add_mangroves = new ol.layer.Tile({
     title:'Mangroves',
     opacity:0.5,
     source:new ol.source.TileWMS({
-        url: 'http://localhost:8080/geoserver/ITE-18-WEBGIS/wms',
+        url: 'https://mangroves-geoserver.onrender.com/geoserver/ITE-18-WEBGIS/wms',
         params:{
             LAYERS: 'ITE-18-WEBGIS:Mangrove_Philippines_DMA-4326',
             TILED: true},

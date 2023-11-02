@@ -41,8 +41,8 @@ body{
     bottom: 12px;
     left: -50px;
       overflow: hidden;
-    /* border: 1px solid #cccccc; */
-    /* padding: 15px; */
+    border: 1px solid #cccccc;
+    padding: 15px;
     min-width: 260px;
     /*  */    /*  */    /*  */    /*  */    /*  */    /*  */    /*  */    /*  */    /*  */    /*  */    /*  */    /*  */    /*  */
 }
@@ -54,7 +54,7 @@ body{
     width: 0;
     position: absolute;
     pointer-events: none;
-
+    background-color: white;
 }
 
 .ol-popup:after {
