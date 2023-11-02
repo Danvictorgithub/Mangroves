@@ -158,7 +158,7 @@ map.on('singleclick', function(e){
                   content.innerHTML = 
                   `
                   <div class="">  
-                    <div class="h-10 text-white flex justify-center items-center bg-green-500">
+                    <div class="h-10 text-white flex justify-center items-center bg-green-500 rounded-t-md">
                       <h2 class='font-bold text-lg '>Features</h2> 
                     </div>
                     <div class='p-2'>
