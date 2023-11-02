@@ -149,17 +149,47 @@ map.on('singleclick', function(e){
             'INFO_FORMAT': 'application/json',
 //             'propertyName': 'barangay,class,shape_area'  get all atributes instead
         });
-        console.log(url);
         if (url){
             $.getJSON(url,function(data){
+                if (data.features[0]) { //Refactored so that it there will be no a floating modal floating with empty content
                 var feature = data.features[0];
                 var props = feature.properties;
-                content.innerHTML = 
-                "<h3> LANDCOVER: </h3> <p>" + props.LCOV.toUpperCase() +
-                "</p> <br> <h3> PROVINCE: </h3> <p>" + props.PROVINCE + "</p>" +
-                "</p> <br> <h3> AREA: </h3> <p>" + props.AREA + "</p>" +
-                "</p> <br> <h3> REGION: </h3> <p>" + props.REGION + "</p>";
-                popup.setPosition(e.coordinate);
+                  console.log("this is called");
+                  content.innerHTML = 
+                  `
+                  <div class="">  
+                    <div class="h-10 text-white flex justify-center items-center bg-green-500">
+                      <h2 class='font-bold text-lg '>Features</h2> 
+                    </div>
+                    <div class='p-2'>
+                      <div class="flex gap-x-2">
+                        <h3 class="font-bold">LANDCOVER:</h3>
+                        <p>${props.LCOV.toUpperCase()}</p>
+                      </div>
+                      <div class="flex gap-x-2">
+                        <h3 class="font-bold">PROVINCE:</h3>
+                        <p>${props.PROVINCE}</p>
+                      </div>
+                      <div class="flex gap-x-2">
+                        <h3 class="font-bold">AREA:</h3>
+                        <p>${props.AREA} km<sup>2</sup></p>
+                      </div>
+                      <div class="flex gap-x-2">
+                        <h3 class="font-bold">REGION:</h3>
+                        <p class="font-semibold">${props.REGION.split(' ')[1]}</p>
+                      </div> 
+                    </div>
+                  </div> 
+                  `
+                  // "<h3> LANDCOVER: </h3> <p>" + props.LCOV.toUpperCase() +
+                  // "</p> <br> <h3> PROVINCE: </h3> <p>" + props.PROVINCE + "</p>" +
+                  // "</p> <br> <h3> AREA: </h3> <p>" + props.AREA + "</p>" +
+                  // "</p> <br> <h3> REGION: </h3> <p>" + props.REGION + "</p>";
+                  popup.setPosition(e.coordinate);
+                }
+                else {
+                  closer.click();
+                }
             })
         }
         else{
@@ -169,7 +199,7 @@ map.on('singleclick', function(e){
 })
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 var homeButton = document.createElement('button');
-homeButton.innerHTML = '<img src = "images/controls/home.png" alt = "HOME" style= "width:20px;height:20px;filter:brightness(0);vertical-align:middle"></img>';
+homeButton.innerHTML = '<span class="material-symbols-outlined">home_pin</span>';
 homeButton.className = 'myButton';
 
 var homeElement = document.createElement('div');
@@ -187,7 +217,7 @@ homeButton.addEventListener("click", () => {
 map.addControl(homeControl);
 
 var fsButton = document.createElement('button');
-fsButton.innerHTML = '<img src = "images/controls/fullscreen.png" alt = "FULLSCREEN" style= "width:20px;height:20px;filter:brightness(0);vertical-align:middle"></img>';
+fsButton.innerHTML = '<span class="material-symbols-outlined">fullscreen</span>';
 fsButton.className = 'myButton';
 
 var fsElement = document.createElement('div');
@@ -214,7 +244,7 @@ fsButton.addEventListener("click", () => {
 map.addControl(fsControl);
 
 var featureInfoButton = document.createElement('button');
-featureInfoButton.innerHTML = '<img src = "images/controls/featureinfo.png" alt = "FEATURE INFO" style= "width:20px;height:20px;filter:brightness(0);vertical-align:middle"></img>';
+featureInfoButton.innerHTML = '<span class="material-symbols-outlined">travel_explore</span>';
 featureInfoButton.className = 'myButton'
 featureInfoButton.id = 'featureInfoButton';
 
@@ -236,8 +266,7 @@ map.addControl(featureInfoControl);
 
 //start of length control
 var lengthButton = document.createElement("button");
-lengthButton.innerHTML =
-  '<img src="images/controls/length.png" alt="LENGTH" style="width:20px; height:20px; filter:brightness(0); vertical-align:middle"></img>';
+lengthButton.innerHTML = '<span class="material-symbols-outlined">straighten</span>';
 lengthButton.className = "myButton";
 lengthButton.id = "lengthButton";
 
@@ -271,7 +300,7 @@ map.addControl(lengthControl);
 
 //start of areaControl
     var areaButton = document.createElement('button');
-    areaButton.innerHTML = '<img src = "images/controls/area.png" alt = "AREA" style= "width:20px;height:20px;filter:brightness(0);vertical-align:middle"></img>';
+    areaButton.innerHTML = '<span class="material-symbols-outlined">square_foot</span>';
     areaButton.className = 'myButton';
     areaButton.id = 'areaButton';
 
@@ -310,7 +339,7 @@ zoomInInteraction.on('boxend',function(){
 });
 
 var ziButton = document.createElement('button');
-ziButton.innerHTML = '<img src = "images/controls/zoom-in.png" alt = "ZOOM-IN" style= "width:20px;height:20px;filter:brightness(0);vertical-align:middle"></img>';
+ziButton.innerHTML = '<span class="material-symbols-outlined">zoom_in</span>';
 ziButton.className = 'myButton';
 ziButton.id ='ziButton';
 
@@ -347,7 +376,7 @@ zoomOutInteraction.on('boxend',function(){
 })
 
 var zoButton = document.createElement('button');
-zoButton.innerHTML = '<img src ="images/controls/zoom-out.png" alt = "ZOOM-OUT" style= "width:20px;height:20px;filter:brightness(0);vertical-align:middle"></img>';
+zoButton.innerHTML = '<span class="material-symbols-outlined">zoom_out</span>';
 zoButton.className = 'myButton';
 zoButton.id = 'zoButton';
 
@@ -587,8 +616,7 @@ var geojson;
 var featureOverlay;
 
 var qryButton = document.createElement("button");
-qryButton.innerHTML =
-  '<img src="images/controls/attribute-query.png" alt="ATTRIBUTE-QUERY" style="width: 20px; height:20px; filter:brightness(0); vertical-align:middle"></img>';
+qryButton.innerHTML = '<span class="material-symbols-outlined">manage_search</span>';
 qryButton.className = "myButton";
 qryButton.id = "qryButton";
 

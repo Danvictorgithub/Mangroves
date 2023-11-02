@@ -7,29 +7,55 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="ol/ol.css">
     <link rel="stylesheet" href="https://raw.githack.com/walkermatt/ol-layerswitcher/master/dist/ol-layerswitcher.css">
+    
     <style type="text/tailwindcss">
       body {
         @apply bg-white
       }
       .myButton {
-        @apply flex justify-center items-center 
+        @apply flex justify-center items-center bg-white rounded-md h-8 w-8 overflow-hidden text-gray-800
         /* fix tailwind overrides */
       }
+      .myButton > * { 
+        @apply text-3xl 
+      }
+      .myButton:hover{
+        @apply bg-green-400
+      }
+      .myButton:active{
+        @apply text-green-400
+      }
+      .myButton.clicked{
+        @apply text-green-500 bg-white
+      }
+      .myButton.clicked:hover {
+        @apply bg-green-400 text-white
+      }
+      .myButton.clicked:active {
+        @apply bg-white 
+      }
+      .homeButtonDiv, .fsButtonDiv, .featureInfoButtonDiv, .lengthButtonDiv, .areaButtonDiv, .ziButtonDiv,.zoButtonDiv, .qryButtonDiv {
+        @apply px-2 py-1 float-left clear-left
+      }
       #map {
-        /* @apply h-[500px] w-[600px] */
+        /* @apply h-[500px] w-[600px] mx-auto */
       }
     </style>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" /> <!-- Material Symbols CDN -->
 </head>
 <body>
-  <div class="container">
+   <div class="container">
     <!-- insert content here dib -->
-  </div>
+    <!-- <a href="./sample.html">next to</a> -->
+  </div> 
   <!-- hidden the map -->
   <div class="bg-gray-800">
-    <div id="map"></div>cd
+    <div id="map"></div>
     <div id="popup" class="ol-popup">
         <a href="#" id="popup-closer" class="ol-popup-closer"></a>
-        <div id="popup-content"></div>
+        <div>
+          <div id="popup-content"></div>
+        </div>
     </div>
 
     <div class="attQueryDiv" id="attQueryDiv"> 

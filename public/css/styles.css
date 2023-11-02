@@ -37,12 +37,14 @@ body{
     position: absolute;
     background-color: white;
     box-shadow: 0 1px 4px rgba(0,0,0,0.2);
-    padding: 15px;
     border-radius: 10px;
-    border: 1px solid #cccccc;
     bottom: 12px;
     left: -50px;
-    min-width: 280px;
+      overflow: hidden;
+    /* border: 1px solid #cccccc; */
+    /* padding: 15px; */
+    min-width: 260px;
+    /*  */    /*  */    /*  */    /*  */    /*  */    /*  */    /*  */    /*  */    /*  */    /*  */    /*  */    /*  */    /*  */
 }
 .ol-popup:after, .ol-popup:before {
     top: 100%;
@@ -52,6 +54,7 @@ body{
     width: 0;
     position: absolute;
     pointer-events: none;
+
 }
 
 .ol-popup:after {
@@ -78,10 +81,13 @@ body{
 }
 
 .ol-popup-closer:after{
+  /* //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// */
+    color:white;
+  /* //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// */
     content: "\00d7";
 }
 
-.myButton{
+/* .myButton{
     background-color: rgba(255, 179, 186, 0.6);
     color: black;
     font-weight: 700;
@@ -104,36 +110,16 @@ body{
 
 .myButton.clicked:hover {
   background-color: rgba(186, 225, 225, 1);
-}
+} */
 
-.homeButtonDiv{
+/* .homeButtonDiv{
     display: inline-block;
     margin: 10px auto auto 10px;
 }
-.fsButtonDiv{
+.fsButtonDiv, .featureInfoButtonDiv, .lengthButtonDiv, .areaButtonDiv, .ziButtonDiv,.zoButtonDiv{
     display: inline-block;
     margin: 2px auto auto 10px; 
-}
-.featureInfoButtonDiv{
-    display: inline-block;
-    margin: 2px auto auto 10px;
-}
-.lengthButtonDiv{
-    display: inline-block;
-    margin: 2px auto auto 10px;
-}
-.areaButtonDiv{
-    display: inline-block;
-    margin: 2px auto auto 10px;
-}
-.ziButtonDiv{
-    display: inline-block;
-    margin: 2px auto auto 10px;
-}
-.zoButtonDiv{
-    display: inline-block;
-    margin: 2px auto auto 10px;
-}
+} */
 
 .ol-tooltip{
     position:relative;
@@ -175,10 +161,10 @@ body{
     background-color: rgba(200,200,200,0.6);
 }
 
-.qryButtonDiv {
+/* .qryButtonDiv {
     display: inline-block;
     margin: 2px auto auto 10px;
-  }
+  } */
   
   .attQueryDiv {
     top: 60px;
