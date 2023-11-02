@@ -1,3 +1,20 @@
+const REGIONS = {
+  'REGION I':'Ilocos Region',
+  'REGION II':'Cagayan Valley',
+  'REGION III':'Central Luzon',
+  'REGION IV':'CALABARZON',
+  'REGION V':'Bicol Region',
+  'REGION VI':'Western Visayas',
+  'REGION VII':'Central Visayas',
+  'REGION VIII':'Eastern Visayas',
+  'REGION IX':'Zamboanga Peninsula',
+  'REGION X':'Northern Mindanao',
+  'REGION XI':'Davao Region',
+  'REGION XII':'SOCCSKSARGEN',
+  'REGION XIII':'Caraga',
+  'ARMM':'Autonomous Region in Muslim Mindanao',
+  'NCR':'National Capital Region',
+}
 var mapView = new ol.View({
     center: ol.proj.fromLonLat([125.568014,8.890400]),
     zoom: 12,
@@ -56,7 +73,7 @@ var add_mangroves = new ol.layer.Tile({
     title:'Mangroves',
     opacity:0.5,
     source:new ol.source.TileWMS({
-        url: 'https://mangroves-geoserver.onrender.com/geoserver/ITE-18-WEBGIS/wms',
+        url: 'http://localhost:8080/geoserver/ITE-18-WEBGIS/wms',
         params:{
             LAYERS: 'ITE-18-WEBGIS:Mangrove_Philippines_DMA-4326',
             TILED: true},
@@ -164,20 +181,23 @@ map.on('singleclick', function(e){
                     <div class='p-2'>
                       <div class="flex gap-x-2">
                         <h3 class="font-bold">LANDCOVER:</h3>
-                        <p>${props.LCOV.toUpperCase()}</p>
+                        <p class="font-medium">${props.LCOV.toUpperCase()}</p>
                       </div>
                       <div class="flex gap-x-2">
                         <h3 class="font-bold">PROVINCE:</h3>
-                        <p>${props.PROVINCE}</p>
+                        <p class="font-medium">${props.PROVINCE}</p>
                       </div>
                       <div class="flex gap-x-2">
                         <h3 class="font-bold">AREA:</h3>
-                        <p>${props.AREA} km<sup>2</sup></p>
+                        <p class="font-medium">${props.AREA} km<sup>2</sup></p>
                       </div>
                       <div class="flex gap-x-2">
                         <h3 class="font-bold">REGION:</h3>
                         <p class="font-semibold">${props.REGION.split(' ')[1]}</p>
-                      </div> 
+                      </div>
+                      <div class='text-center'>
+                        <h2 class="border-t-2 text-lg font-bold">${REGIONS[props.REGION]}</h2>
+                      </div>
                     </div>
                   </div> 
                   `

@@ -3,93 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WEB-GIS</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="ol/ol.css">
+    <title>Document</title>
     <link rel="stylesheet" href="https://raw.githack.com/walkermatt/ol-layerswitcher/master/dist/ol-layerswitcher.css">
-    
+    <script src="https://cdn.tailwindcss.com" defer></script>
     <style type="text/tailwindcss">
       body {
         @apply bg-white
       }
       .myButton {
-        @apply flex justify-center items-center bg-white rounded-md h-8 w-8 overflow-hidden text-gray-800
+        @apply flex justify-center items-center 
         /* fix tailwind overrides */
       }
-      .myButton > * { 
-        @apply text-3xl 
-      }
-      .myButton:hover{
-        @apply bg-green-400
-      }
-      .myButton:active{
-        @apply text-green-400
-      }
-      .myButton.clicked{
-        @apply text-green-500 bg-white
-      }
-      .myButton.clicked:hover {
-        @apply bg-green-400 text-white
-      }
-      .myButton.clicked:active {
-        @apply bg-white 
-      }
-      .homeButtonDiv, .fsButtonDiv, .featureInfoButtonDiv, .lengthButtonDiv, .areaButtonDiv, .ziButtonDiv,.zoButtonDiv, .qryButtonDiv {
-        @apply px-2 py-1 float-left clear-left
-      }
       #map {
-        /* @apply h-[500px] w-[600px] mx-auto */
+        /* @apply h-[500px] w-[600px] */
       }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" /> <!-- Material Symbols CDN -->
 </head>
 <body>
-   <div class="container">
-    <!-- insert content here dib -->
-    <!-- <a href="./sample.html">next to</a> -->
-  </div> 
-  <!-- hidden the map -->
-  <div class="bg-gray-800">
-    <div id="map"></div>
-    <div id="popup" class="ol-popup">
-        <a href="#" id="popup-closer" class="ol-popup-closer"></a>
-        <div>
-          <div id="popup-content"></div>
+  <div class="app"> 
+    <div class="h-[70 px]">
+      <div class="container mx-auto h-full flex justify-between items-center p-4">
+        <div class="flex justify-center items-center">
+          <img class="h-12" src="images/logo.png" alt="Logo">
+          <h1 class="text-2xl font-mono font-semibold">Mangroves</h1>
         </div>
+        <nav class="">
+          <ul class="flex gap-4 text-xl font-semibold">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="map.html">Map</a></li>
+            <li><a href="about.html">About</a></li>
+          </ul>
+        </nav>
+      </div>
     </div>
 
-    <div class="attQueryDiv" id="attQueryDiv"> 
-        <div class="headerDiv" id="headerDiv">
-          <label>Attribute Query</label>
-        </div><br>
-        
-        <label>Select Layer</label>
-        <select name="selectLayer" id="selectLayer">
-        </select><br><br>
-  
-        <label>Select Attribute</label>
-        <select name="selectAttribute" id="selectAttribute">
-        </select><br><br>
-  
-        <label>Select Operator</label>
-        <select name="selectOperator" id="selectOperator">
-        </select><br><br>
-  
-        <label>Enter Value</label>
-        <input type="text" name="enterValue" id="enterValue">
-        </select><br><br>
-  
-        <button type="button" id="attQryRun" class="attQryRun" onclick="attributeQuery()">Run</button>
+    <div class="container mx-auto h-[calc(100svh-3.5rem)] relative rounded-3xl overflow-hidden">
+      <div class="bg-[url('./images/hero_mangroves.jpg')] bg-cover bg-center h-full">
+        <div class="absolute inset-0 bg-black opacity-30"></div>
       </div>
-        <div class="attListDiv" id="attListDiv"></div>
+      <div class="absolute top-0 text-white flex justify-center items-center h-full w-full">
+        <h1 class="font-bold text-8xl text-center">Discover the hidden gems of Philippine <span class="text-green-400">Mangroves</span></h1>
+      </div>
+    </div>
+    <div class="container mx-auto text-center p-5 border-b-2">
+      <h1 class="font-bold text-5xl text-green-500 my-10">Find Mangroves in the Philippines.</h1>
+      <p class="mt-4 text-2xl">We provide an up-to-date information about mangroves in the whole archipelago with Easy access to these locations.</p>
+      <div>
+        <ul class="flex justify-around items-center mt-12 mb-8 gap-4">
+          <li class="flex-1 basis-0 hover:bg-green-300 rounded-lg transition">
+            <p class="font-bold md:text-3xl sm:text-xl">Regions</p>
+            <p class="font-semibold text-2xl mt-3">16</p>
+          </li>
+          <li class="flex-1 basis-0 hover:bg-green-300 rounded-lg transition">
+            <p class="font-bold md:text-3xl sm:text-xl">Provinces</p>
+            <p class="font-semibold text-2xl mt-3">63</p>
+          </li>
+          <li class="flex-1 basis-0 hover:bg-green-300 rounded-lg transition">
+            <p class="font-bold md:text-3xl sm:text-xl">Total Area</p>
+            <p class="font-semibold text-2xl mt-3">360068 km<sup>2</sup></p>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="container mx-auto flex flex-wrap flex-row mt-10">
+      <div class="basis-0 flex-grow flex-shrink-0 w-full">
+        <img class="min-h-[400px] min-w-[400px] h-[400px] m-auto" src="./images/mangroveicon.png" alt="">
+      </div>
+      <div class="flex-1 p-5 ">
+        <div class="bg-teal-500 text-white rounded-xl h-full p-4 flex justify-center items-center flex-col gap-4">
+          <h1 class="text-3xl font-bold text-center">Mangroves: Nature's Guardians</h1>
+          <p class="text-xl text-center">Prepare to be amazed by the essential role mangroves play in the coastal ecosystems of the Philippines. With their intricate root systems, these unique trees create natural barriers that protect shorelines and nurture local marine life.</p>
+        </div>
+      </div>
+    </div>
   </div>
-
-  
-
-    <script src="ol/ol.js"></script>
-    <script src="https://raw.githack.com/walkermatt/ol-layerswitcher/master/dist/ol-layerswitcher.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="for_ol.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
 </body>
 </html>

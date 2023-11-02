@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WEB-GIS</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="ol/ol.css">
+    <link rel="stylesheet" href="https://raw.githack.com/walkermatt/ol-layerswitcher/master/dist/ol-layerswitcher.css">
+    
+    <style type="text/tailwindcss">
+      body {
+        @apply bg-white
+      }
+      .myButton {
+        @apply flex justify-center items-center bg-white rounded-md h-8 w-8 overflow-hidden text-gray-800
+        /* fix tailwind overrides */
+      }
+      .myButton > * { 
+        @apply text-3xl 
+      }
+      .myButton:hover{
+        @apply bg-green-400
+      }
+      .myButton:active{
+        @apply text-green-400
+      }
+      .myButton.clicked{
+        @apply text-green-500 bg-white
+      }
+      .myButton.clicked:hover {
+        @apply bg-green-400 text-white
+      }
+      .myButton.clicked:active {
+        @apply bg-white 
+      }
+      .homeButtonDiv, .fsButtonDiv, .featureInfoButtonDiv, .lengthButtonDiv, .areaButtonDiv, .ziButtonDiv,.zoButtonDiv, .qryButtonDiv {
+        @apply px-2 py-1 float-left clear-left
+      }
+      #map {
+        /* @apply h-[500px] w-[600px] mx-auto */
+      }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" /> <!-- Material Symbols CDN -->
+</head>
+<body>
+   <div class="container">
+    <!-- insert content here dib -->
+    <!-- <a href="./sample.html">next to</a> -->
+  </div> 
+  <!-- hidden the map -->
+  <div class="bg-gray-800">
+    <div id="map"></div>
+    <div id="popup" class="ol-popup">
+        <a href="#" id="popup-closer" class="ol-popup-closer"></a>
+        <div>
+          <div id="popup-content"></div>
+        </div>
+    </div>
+
+    <div class="attQueryDiv" id="attQueryDiv"> 
+        <div class="headerDiv" id="headerDiv">
+          <label>Attribute Query</label>
+        </div><br>
+        
+        <label>Select Layer</label>
+        <select name="selectLayer" id="selectLayer">
+        </select><br><br>
+  
+        <label>Select Attribute</label>
+        <select name="selectAttribute" id="selectAttribute">
+        </select><br><br>
+  
+        <label>Select Operator</label>
+        <select name="selectOperator" id="selectOperator">
+        </select><br><br>
+  
+        <label>Enter Value</label>
+        <input type="text" name="enterValue" id="enterValue">
+        </select><br><br>
+  
+        <button type="button" id="attQryRun" class="attQryRun" onclick="attributeQuery()">Run</button>
+      </div>
+        <div class="attListDiv" id="attListDiv"></div>
+  </div>
+
+  
+
+    <script src="ol/ol.js"></script>
+    <script src="https://raw.githack.com/walkermatt/ol-layerswitcher/master/dist/ol-layerswitcher.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="for_ol.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</body>
+</html>
