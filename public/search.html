@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mangroves Search</title>
+    <script src="https://cdn.tailwindcss.com" defer></script>
+    <!-- <script src="./js/search.js" defer></script> -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <style type="text/tailwindcss">
+        @layer base {
+            .toggle {
+                @apply bg-green-500 text-white border-green-500
+            }
+        }
+    </style>
+    <script src="https://unpkg.com/infinite-scroll@4/dist/infinite-scroll.pkgd.js"></script>
+    <script defer>
+        document.addEventListener('DOMContentLoaded',async () => {
+            
+            function createCard(data) {
+                const {
+                    imagePath,
+                    title,
+                    province,
+                    region,
+                    area,
+                    longitude,
+                    latitude,
+                    regionName
+                } = data;
+
+                const outerDiv = document.createElement('div');
+                outerDiv.classList.add('mb-4');
+
+                const flexContainer = document.createElement('div');
+                flexContainer.classList.add('flex', 'justify-center');
+
+                const cardContainer = document.createElement('div');
+                cardContainer.classList.add('w-[800px]', 'shadow-md', 'flex', 'md:flex-row', 'flex-col', 'rounded-xl', 'overflow-hidden');
+
+                const image = document.createElement('img');
+                image.src = imagePath;
+                image.classList.add('h-[275px]', 'md:h-[340px]', 'md:w-[400px]', 'object-cover');
+
+                const contentContainer = document.createElement('div');
+                contentContainer.classList.add('rounded-e-xl', 'w-full', 'p-4', 'flex', 'flex-col', 'relative');
+
+                const titleElement = document.createElement('h1');
+                titleElement.classList.add('text-center', 'font-bold', 'text-2xl', 'my-4', 'px-4');
+                titleElement.textContent = title;
+
+                const informationElements = [
+                    { label: 'Province:', value: province },
+                    { label: 'Region:', value: region },
+                    { label: 'Area:', value: `approx. ${area} km<sup>2</sup>` },
+                    { label: 'Longitude:', value: longitude },
+                    { label: 'Latitude:', value: latitude }
+                ];
+
+                contentContainer.appendChild(titleElement); // Move title to the top
+
+                informationElements.forEach(info => {
+                    const infoContainer = document.createElement('div');
+                    infoContainer.classList.add('flex', 'gap-2');
+
+                    const label = document.createElement('p');
+                    label.classList.add('font-bold', 'text-xl');
+                    label.textContent = info.label;
+
+                    const value = document.createElement('p');
+                    value.classList.add('text-xl');
+                    value.innerHTML = info.value;
+
+                    infoContainer.appendChild(label);
+                    infoContainer.appendChild(value);
+
+                    contentContainer.appendChild(infoContainer);
+                });
+                
+                const openInMapButton = document.createElement('button');
+                openInMapButton.classList.add('border-2', 'px-4', 'py-2', 'rounded-xl', 'my-2', 'bg-green-500', 'border-green-500', 'hover:bg-white', 'hover:text-black', 'text-white', 'text-2xl', 'font-bold');
+                openInMapButton.textContent = 'Open in Map';
+                openInMapButton.setAttribute('longitude', longitude);
+                openInMapButton.setAttribute('latitude', latitude);
+
+                openInMapButton.addEventListener('click', (e) => {
+                    const longitude = e.target.getAttribute('longitude');
+                    const latitude = e.target.getAttribute('latitude');
+                    location.href=`map.html?lat=${latitude}&long=${longitude}`
+                })
+
+                const regionNameElement = document.createElement('div');
+                regionNameElement.classList.add('flex-1', 'flex', 'flex-col', 'justify-end', 'items-center', 'bottom-0', 'text-xl');
+
+                const regionNameParagraph = document.createElement('p');
+                regionNameParagraph.classList.add('font-bold');
+                regionNameParagraph.textContent = regionName;
+
+                regionNameElement.appendChild(regionNameParagraph);
+
+                contentContainer.appendChild(openInMapButton);
+                contentContainer.appendChild(regionNameElement);
+
+                cardContainer.appendChild(image);
+                cardContainer.appendChild(contentContainer);
+
+                flexContainer.appendChild(cardContainer);
+
+                outerDiv.appendChild(flexContainer);
+
+                return outerDiv;
+            }
+            const REGIONS = {
+                'REGION I':'Ilocos Region',
+                'REGION II':'Cagayan Valley',
+                'REGION III':'Central Luzon',
+                'REGION IVA':'CALABARZON',
+                'REGION IVB':'MIMAROPA',
+                'REGION V':'Bicol Region',
+                'REGION VI':'Western Visayas',
+                'REGION VII':'Central Visayas',
+                'REGION VIII':'Eastern Visayas',
+                'REGION IX':'Zamboanga Peninsula',
+                'REGION X':'Northern Mindanao',
+                'REGION XI':'Davao Region',
+                'REGION XII':'SOCCSKSARGEN',
+                'REGION XIII':'Caraga',
+                'ARMM':'Autonomous Region in Muslim Mindanao',
+                'NCR':'National Capital Region',
+            }
+            const searchForm = {
+                province: '',
+                region: '',
+                area: {
+                    min: '',
+                    max: ''
+                },
+                maxOutput: 50,
+                orderBy: 'asc'
+            }
+            const modalDiv = document.querySelector('#modal');
+            const modalButton = document.querySelector('#modalButton');
+            const searchLogo = document.querySelector("#searchLogo");
+            const searchButton = document.querySelector("#search");
+            const query = document.querySelector('#query');
+            const provinceButton = document.querySelector('#province');
+            const regionButton = document.querySelector('#region');
+            const minimumArea = document.querySelector('#min');
+            const maximumArea = document.querySelector('#max');
+            const maximumOutput = document.querySelector('#maxOut');
+            const ascendingButton = document.querySelector(`#asc`);
+            const descendingButton = document.querySelector(`#desc`);
+            const datasDiv = document.querySelector('#datas');
+            let modal = false;
+            let provinceOrRegion = 'province'
+            let ascOrDesc = 'asc'
+
+            let datas = [];
+            //reactiveLike functions
+            // show or hide modal
+            function updateModal() {
+                if (modal) {
+                modalDiv.classList.remove('hidden'); 
+                }
+                else {
+                    modalDiv.classList.add('hidden');
+                }
+            }
+            function ProvinceOrRegionUpdate() {
+                if (provinceOrRegion === 'province') {
+                    query.value = '';
+                    searchForm[provinceOrRegion] = '';
+                    query.placeholder = 'Search by Provinces';
+                    province.classList.add('toggle');
+                    region.classList.remove('toggle');
+                }
+                else {
+                    query.value = '';
+                    searchForm[provinceOrRegion] = '';
+                    query.placeholder = 'Search by Regions';
+                    region.classList.add('toggle');
+                    province.classList.remove('toggle');
+                }
+            }
+            function ascOrDescUpdate() {
+                if (ascOrDesc === 'asc') {
+                    searchForm['orderBy'] = ascOrDesc;
+                    ascendingButton.classList.add('toggle');
+                    descendingButton.classList.remove('toggle');
+                }
+                else {
+                    searchForm['orderBy'] = ascOrDesc;
+                    descendingButton.classList.add('toggle');
+                    ascendingButton.classList.remove('toggle');
+                }
+            }
+            //Query pipeline for url filters
+            //CQLFilter referred from https://docs.geoserver.org/latest/en/user/tutorials/cql/cql_tutorial.html
+            function pipeLine() {
+                let CQLFilter = `&maxFeatures=${(searchForm.maxOutput) ? searchForm.maxOutput : 50}&CQL_FILTER=(`;
+                let noProvinceOrRegionFlag = false;
+                if (searchForm.province.trim() !== '' || searchForm.region.trim()  !== '') {
+                    CQLFilter += `${Object.keys(searchForm).find((key) => key === provinceOrRegion).toUpperCase()} LIKE '${searchForm[provinceOrRegion].toUpperCase()}%25' `
+                }
+                else {
+                    noProvinceOrRegionFlag = true;
+                }
+                if (searchForm.area.min !== '' || searchForm.area.max !== '') {
+                    if (searchForm.area.min !== '' && searchForm.area.max !== '') {
+                        CQLFilter += `${!noProvinceOrRegionFlag ? 'AND ':''}AREA BETWEEN ${searchForm.area.min} AND ${searchForm.area.max} `
+                    }
+                    else if (searchForm.area.max !== '') {
+                        CQLFilter += `${!noProvinceOrRegionFlag ? 'AND ':''}AREA <= ${searchForm.area.max}`
+                    }
+                    else {
+                        CQLFilter += `${!noProvinceOrRegionFlag ? 'AND ':''}AREA >= ${searchForm.area.min}`
+                    }
+                }
+                // CQLFilter += ")&sortBy=AREA";
+                CQLFilter += ")";
+                CQLFilter += `&sortBy=AREA&sortOrder=${searchForm.orderBy}`;
+                return CQLFilter;
+            }
+                //returns the approximate centroid or center of the polygon
+            function degreesToRadians(degrees) {
+                    return degrees * (Math.PI / 180);
+                }
+
+            function getCentroid(coordinates) {
+                let totalX = 0;
+                let totalY = 0;
+                let totalZ = 0;
+
+                // Convert latitude and longitude to Cartesian coordinates
+                coordinates.forEach((coordinate) => {
+                    const latitude = degreesToRadians(coordinate[1]);
+                    const longitude = degreesToRadians(coordinate[0]);
+
+                    totalX += Math.cos(latitude) * Math.cos(longitude);
+                    totalY += Math.cos(latitude) * Math.sin(longitude);
+                    totalZ += Math.sin(latitude);
+                });
+
+                // Average Cartesian coordinates
+                const avgX = totalX / coordinates.length;
+                const avgY = totalY / coordinates.length;
+                const avgZ = totalZ / coordinates.length;
+
+                // Convert average Cartesian coordinates back to latitude and longitude
+                const centroidLongitude = Math.atan2(avgY, avgX) * (180 / Math.PI);
+                const centroidLatitude = Math.atan2(avgZ, Math.sqrt(avgX * avgX + avgY * avgY)) * (180 / Math.PI);
+
+            return { longitude: centroidLongitude, latitude: centroidLatitude };
+            }
+            function updateDatasDiv() {
+                while(datasDiv.firstChild) {
+                    datasDiv.removeChild(datasDiv.firstChild);
+                }
+                datas.forEach(data => {
+                    datasDiv.appendChild(createCard(data));
+                })
+            }
+            //Search function with applied pipelined filters
+            async function search() {
+                let url = "http://localhost:8080/geoserver/ITE-18-WEBGIS/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=ITE-18-WEBGIS:Mangrove_Philippines_DMA-4326&outputFormat=application/json";
+                // url += '&startIndex=1&maxFeatures=50'
+                
+                if (searchForm.province.trim()  !== '' || searchForm.region.trim()  !== '' || searchForm.area.min !== '' || searchForm.area.max !== '') {
+                    url += pipeLine();
+                }
+                else {
+                    url += `&maxFeatures=${searchForm.maxOutput}&sortBy=AREA&sortOrder=${searchForm.orderBy}`;
+                }
+                console.log(url);
+                const response = await fetch(url);
+                const data = await response.json();
+                const structuredData = data.features.map(feature => {
+                    const {longitude,latitude} = getCentroid(feature.geometry.coordinates[0][0]);
+                    return {
+                        title: 'Mangroves Landcover',
+                        province:feature.properties.PROVINCE.split(" ").map((word) => word[0].toUpperCase() + word.slice(1).toLowerCase()).join(" "),
+                        area: feature.properties.AREA,
+                        region:feature.properties.REGION.split(" ").pop(),
+                        regionName: REGIONS[feature.properties.REGION],
+                        imagePath:`./images/PROVINCES/${feature.properties.PROVINCE}.jpg`,
+                        longitude,
+                        latitude
+                    }
+                });
+                datas = structuredData;
+                console.log(datas);
+                updateDatasDiv();
+            }
+            // toggle modal by clicking button
+            modalButton.addEventListener('click', () => {
+                modal = !modal;
+                updateModal();
+            });
+            provinceButton.addEventListener('click', () => {
+                provinceOrRegion = 'province';
+                ProvinceOrRegionUpdate();
+            });
+            regionButton.addEventListener('click', () => {
+                provinceOrRegion = 'region';
+                ProvinceOrRegionUpdate();
+            });
+            query.addEventListener('input',(e) => {
+                searchForm[provinceOrRegion] = e.target.value;
+            })
+            minimumArea.addEventListener('input',(e) => {
+                searchForm.area.min = e.target.value;
+                console.log(searchForm);
+            })
+            maximumArea.addEventListener('input',(e) => {
+                searchForm.area.max = e.target.value;
+                console.log(searchForm);
+            })
+            maximumOutput.addEventListener('input',(e) => {
+                searchForm.maxOutput = e.target.value;
+                console.log(searchForm);
+            })
+            searchButton.addEventListener('click',() => {
+                search();
+            })
+            ascendingButton.addEventListener('click',() => {
+                ascOrDesc = 'asc';
+                ascOrDescUpdate();
+                console.log(searchForm);
+            })
+            descendingButton.addEventListener('click',() => {
+                ascOrDesc = 'desc';
+                ascOrDescUpdate();
+                console.log(searchForm);
+            })
+            updateModal();
+            ProvinceOrRegionUpdate();
+            ascOrDescUpdate();
+
+
+            //Testing
+            // setTimeout(() => {
+            //     modal = false;
+            //     updateModal();
+            // },2000);
+            // setTimeout(() => {
+            //     provinceOrRegion = 'region';
+            //     ProvinceOrRegionUpdate();
+            // },2000);
+            // setTimeout(() => {
+            //     ascOrDesc = 'desc'
+            //     ascOrDescUpdate();
+            // },2000);
+        });
+    </script>
+</head>
+<body>
+    <div class="container mx-auto">
+        <header class="h-[70px]">
+            <div class="h-full flex justify-between items-center p-4">
+              <div class="flex flex-1 basis-0 justify-start items-center">
+                <img class="h-12" src="images/logo.png" alt="Logo">
+                <h1 class="text-2xl font-mono font-semibold">Mangroves</h1>
+              </div>
+              <nav class="flex-1 basis-0 flex justify-center">
+                <ul class="flex gap-4  text-xl font-semibold">
+                  <li><a href="index.html">Home</a></li>
+                  <li><a href="map.html">Map</a></li>
+                  <li><a href="about.html">About</a></li>
+                </ul>
+              </nav>
+              <div class="flex-1 basis-0 flex justify-end">
+                <a class="text-xl font-semibold" href="search.html">Search</a>
+              </div>
+            </div>
+          </header>
+          <div class="h-[calc(100svh-70px)] ">
+            <div class="flex gap-4 h-10 px-4 relative">
+                <div class="w-full">
+                    <div class="flex-1 h-[50px] relative flex">
+                        <span id="searchLogo" class="absolute flex items-center h-full pl-2 z-10 material-symbols-outlined">apartment</span>
+                        <button id="modalButton" class="absolute right-0 flex items-center justify-center h-full z-10 ">
+                            <span class="material-symbols-outlined before:border-l-[3px] before:h-[75%] before:mr-1 mr-2">tune</span>
+                        </button>
+                        <input id="query" class="w-full h-full border-2 font-bold rounded-xl drop-shadow-sm pl-8 pr-4 focus:outline-none focus:outline-2 focus:outline-green-500" placeholder="Search by Provinces" type="text">
+                    </div>
+                    <div id="modal" class="py-2 h-[336px] hidden">
+                        <div class="border-2 rounded-md p-4 absolute right-0 left-0 mx-4 bg-white z-10">
+                            <p class="text-center font-bold text-2xl py-2">Options</p>
+                            <div class="flex gap-2 mb-2">
+                                <button id="province" class="text-2xl font-bold flex-1 basis-0 border-2 px-4 py-2 rounded-full flex justify-center items-center">
+                                    <span class="material-symbols-outlined">apartment</span>
+                                    Province
+                                </button>
+                                <button id="region" class="text-2xl font-bold flex-1 basis-0 border-2 px-4 py-2 rounded-full flex justify-center items-center">
+                                    <span class="material-symbols-outlined">public</span>
+                                    Region
+                                </button>
+                            </div>
+                            <p class="text-center font-bold text-xl py-2">Area</p>
+                            <div class="flex justify-center items-center ">
+                                <div class="flex flex-1 basis-0 h-12 relative">
+                                    <span class="absolute flex items-center justify-center h-full z-10 before:border-l-[3px] before:h-[75%] before:mr-1 mr-2 material-symbols-outlined">area_chart</span>
+                                    <input type="number" id="min" input id="query" class="w-0 flex-1 h-full border-2 font-bold rounded-xl drop-shadow-sm pl-8 pr-4 focus:outline-none focus:outline-2 focus:outline-green-500" placeholder="Minimum" type="text">
+                                </div>
+                                <p class="mx-2 border-b-4 border-black w-4 shrink-0"></p>    
+                                <div class="flex flex-1 basis-0 h-12 relative">
+                                    <span class="absolute flex items-center justify-center h-full z-10 before:border-l-[3px] before:h-[75%] before:mr-1 mr-2 material-symbols-outlined">area_chart</span>
+                                    <input type="number" id="max" input id="query" class="w-0 flex-1 h-full border-2 font-bold rounded-xl drop-shadow-sm pl-8 pr-4 focus:outline-none focus:outline-2 focus:outline-green-500" placeholder="Maximum" type="text">
+                                </div> 
+                            </div>
+                            <p class="text-center font-bold text-xl py-2">Maximum Output</p>
+                            <input id="maxOut" class="text-center w-full h-[50px] border-2 font-bold rounded-xl drop-shadow-sm pl-8 pr-4 focus:outline-none focus:outline-2 focus:outline-green-500" placeholder="Max Output" type="number" value="50">
+                            <p class="text-center font-bold text-xl py-2">Order By Area</p>
+                            <div class="flex gap-2 mb-2">
+                                <button id="asc" class="text-lg sm:text-2xl font-bold flex-1 basis-0 border-2 px-4 py-2 rounded-full flex justify-center items-center">
+                                    <span class="material-symbols-outlined">trending_up</span>
+                                    Ascending
+                                </button>
+                                <button id="desc" class="text-lg sm:text-2xl  font-bold flex-1 basis-0 border-2 px-4 py-2 rounded-full flex justify-center items-center">
+                                    <span class="material-symbols-outlined">trending_down</span>
+                                    Descending
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button id="search" class="h-[50px] w-[50px] border-2 px-4 py-2 rounded-full flex justify-center items-center">
+                    <span class="material-symbols-outlined">search</span>
+                </button>
+            </div>
+            <div id="datas" class="mt-12 px-4">
+                <!-- Template -->
+                <!-- <div class=" mb-4">
+                    <div class="flex justify-center">
+                        <div class=" w-[800px] shadow-md flex md:flex-row flex-col rounded-xl overflow-hidden">
+                            <img src="./images/PROVINCES/AKLAN.jpg" class="h-[275px] md:h-[340px] md:w-[400px] object-cover">
+                            <div class="rounded-e-xl w-full p-4 flex flex-col relative">
+                                <h1 class="text-center font-bold text-2xl my-4 px-4">Mangroves Landcover</h1>
+                                <div class="flex gap-2">
+                                    <p class="font-bold text-xl">Province: </p>
+                                    <p class="text-xl">Pangasinan</p>
+                                </div>
+                                <div class="flex gap-2">
+                                    <p class="font-bold text-xl">Region: </p>
+                                    <p class="text-xl">I</p>
+                                </div> 
+                                <div class="flex gap-2">
+                                    <p class="font-bold text-xl">Area: </p>
+                                    <p class="text-xl">approx. 0 km<sup>2</sup></p>
+                                </div>
+                                <div class="flex gap-2">
+                                    <p class="font-bold text-xl">Longitude: </p>
+                                    <p class="text-xl">118.08317443749999</p>
+                                </div>
+                                <div class="flex gap-2">
+                                    <p class="font-bold text-xl">Latitude: </p>
+                                    <p class="text-xl">9.0312334075</p>
+                                </div>
+                                <button longitude="118.08317443749999" latitude="9.0312334075" class="border-2 px-4 py-2 rounded-xl my-2 bg-green-500 border-green-500 hover:bg-white hover:text-black text-white text-2xl font-bold">Open in Map</button>
+                                <div class="flex-1 flex flex-col justify-end items-center bottom-0 text-xl">
+                                    <p class="font-bold">Ilocos Region</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div> -->
+          </div>
+    </div>
+</body>
+</html>

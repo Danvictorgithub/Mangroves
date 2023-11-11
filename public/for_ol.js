@@ -1,8 +1,14 @@
+
+////////////////////////////////////////////////////////////////////
+const currentLocation = new URL(window.location.toLocaleString());
+const latitude = currentLocation.searchParams.get("lat");
+const longitude = currentLocation.searchParams.get("long");
 const REGIONS = {
   'REGION I':'Ilocos Region',
   'REGION II':'Cagayan Valley',
   'REGION III':'Central Luzon',
-  'REGION IV':'CALABARZON',
+  'REGION IVA':'CALABARZON',
+  'REGION IVB':'MIMAROPA',
   'REGION V':'Bicol Region',
   'REGION VI':'Western Visayas',
   'REGION VII':'Central Visayas',
@@ -15,9 +21,14 @@ const REGIONS = {
   'ARMM':'Autonomous Region in Muslim Mindanao',
   'NCR':'National Capital Region',
 }
+////////////////////////////////////////////////////////////////////
+
 var mapView = new ol.View({
-    center: ol.proj.fromLonLat([125.568014,8.890400]),
-    zoom: 12,
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Added feature to redirect to map from home or search page
+    center: ol.proj.fromLonLat((longitude && latitude)? [longitude,latitude]:[125.568014,8.890400]),
+    zoom: (longitude &&latitude)?19.2:15,
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 });
 
 var map = new ol.Map({
@@ -54,7 +65,7 @@ var baseGroup = new ol.layer.Group({
     layers: [osmTile,nonTile, bingMapsAerial]
 });
 map.addLayer(baseGroup)
-
+////////////////////////////////////////////////////////////////////
 // var add_butuan = new ol.layer.Tile({
 //     title:'Butuan',
 //     //opacity:1,
@@ -156,7 +167,69 @@ closer.onclick = function(){
 //     }
 // })
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+function manualFeatureInfo(longitude,latitude) {
+  if (featureInfoFlag) { 
+    content.innerHTML = '';
+    var resolution = map.getView().getResolution();
+    var projection = map.getView().getProjection();
+
+    var url = add_mangroves.getSource().getFeatureInfoUrl([longitude,latitude],resolution,projection, {
+        'INFO_FORMAT': 'application/json',
+//             'propertyName': 'barangay,class,shape_area'  get all atributes instead
+    });
+    if (url){
+        $.getJSON(url,function(data){
+          console.log(data);
+          if (data.features[0]) { //Refactored so that it there will be no a floating modal floating with empty content
+            var feature = data.features[0];
+            var props = feature.properties;
+              content.innerHTML = 
+              `
+              <div class="">  
+                <div class="h-10 text-white flex justify-center items-center bg-green-500 rounded-t-md">
+                  <h2 class='font-bold text-lg '>Features</h2> 
+                </div>
+                <div class='p-2'>
+                  <div class="flex gap-x-2">
+                    <h3 class="font-bold">LANDCOVER:</h3>
+                    <p class="font-medium">${props.LCOV.toUpperCase()}</p>
+                  </div>
+                  <div class="flex gap-x-2">
+                    <h3 class="font-bold">PROVINCE:</h3>
+                    <p class="font-medium">${props.PROVINCE.split(" ").map((word) => word[0].toUpperCase() + word.slice(1).toLowerCase()).join(" ")}</p>
+                  </div>
+                  <div class="flex gap-x-2">
+                    <h3 class="font-bold">AREA:</h3>
+                    <p class="font-medium">${props.AREA} km<sup>2</sup></p>
+                  </div>
+                  <div class="flex gap-x-2">
+                    <h3 class="font-bold">REGION:</h3>
+                    <p class="font-semibold">${props.REGION.split(' ')[1]}</p>
+                  </div>
+                  <div class='text-center'>
+                    <h2 class="border-t-2 text-lg font-bold">${REGIONS[props.REGION]}</h2>
+                  </div>
+                </div>
+              </div> 
+              `
+              // "<h3> LANDCOVER: </h3> <p>" + props.LCOV.toUpperCase() +
+              // "</p> <br> <h3> PROVINCE: </h3> <p>" + props.PROVINCE + "</p>" +
+              // "</p> <br> <h3> AREA: </h3> <p>" + props.AREA + "</p>" +
+              // "</p> <br> <h3> REGION: </h3> <p>" + props.REGION + "</p>";
+              popup.setPosition([longitude,latitude]);
+            }
+            else {
+              closer.click();
+            }
+        })
+    }
+    else{
+        popup.setPosition(undefined);
+    }
+  }
+}
 map.on('singleclick', function(e){
+  console.log(e.coordinate);
     if (featureInfoFlag) { 
         content.innerHTML = '';
         var resolution = map.getView().getResolution();
@@ -171,7 +244,6 @@ map.on('singleclick', function(e){
                 if (data.features[0]) { //Refactored so that it there will be no a floating modal floating with empty content
                 var feature = data.features[0];
                 var props = feature.properties;
-                  console.log("this is called");
                   content.innerHTML = 
                   `
                   <div class="">  
@@ -185,7 +257,7 @@ map.on('singleclick', function(e){
                       </div>
                       <div class="flex gap-x-2">
                         <h3 class="font-bold">PROVINCE:</h3>
-                        <p class="font-medium">${props.PROVINCE}</p>
+                        <p class="font-medium">${props.PROVINCE.split(" ").map((word) => word[0].toUpperCase() + word.slice(1).toLowerCase()).join(" ")}</p>
                       </div>
                       <div class="flex gap-x-2">
                         <h3 class="font-bold">AREA:</h3>
@@ -218,6 +290,9 @@ map.on('singleclick', function(e){
     }
 })
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
 var homeButton = document.createElement('button');
 homeButton.innerHTML = '<span class="material-symbols-outlined">home_pin</span>';
 homeButton.className = 'myButton';
@@ -996,3 +1071,12 @@ function addMapLayerList() {
     }
   }
   //end of attribute query control
+  if (longitude && latitude) {
+    featureInfoButton.click();
+    // I found out that I need to convert the coordinates to EPSG:3857 or else it will not work
+    var geojsonCoordinates = ol.proj.transform([longitude, latitude], 'EPSG:4326', 'EPSG:3857');
+    
+    manualFeatureInfo(...geojsonCoordinates);
+    console.log("this is called");
+  }
+  
