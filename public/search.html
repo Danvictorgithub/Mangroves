@@ -17,7 +17,28 @@
     <script src="https://unpkg.com/infinite-scroll@4/dist/infinite-scroll.pkgd.js"></script>
     <script defer>
         document.addEventListener('DOMContentLoaded',async () => {
-            
+            function createResults(count) {
+                // Create the main container div
+                var container = document.createElement("div");
+                container.classList.add("flex", "gap-2", "items-baseline", "text-xl", "font-bold");
+
+                // Create the first paragraph element
+                var paragraph1 = document.createElement("p");
+                paragraph1.textContent = "Results: ";
+                
+                // Create the second paragraph element with a specific ID
+                var paragraph2 = document.createElement("p");
+                paragraph2.classList.add("font-medium");
+                paragraph2.id = "resultsCount";
+                paragraph2.textContent = count;
+
+                // Append the paragraph elements to the main container
+                container.appendChild(paragraph1);
+                container.appendChild(paragraph2);
+
+                // Return the created DOM structure
+            return container;
+} 
             function createCard(data) {
                 const {
                     imagePath,
@@ -138,7 +159,8 @@
                 },
                 maxOutput: 50,
                 orderBy: 'asc',
-                showOneProvince:'off'
+                showOneProvince:'off',
+                showOneRegion:'off',
             }
             const modalDiv = document.querySelector('#modal');
             const modalButton = document.querySelector('#modalButton');
@@ -146,19 +168,23 @@
             const searchButton = document.querySelector("#search");
             const query = document.querySelector('#query');
             const provinceButton = document.querySelector('#province');
-            const regionButton = document.querySelector('#region');
+            const regionButtonProvince = document.querySelector('#region');
             const minimumArea = document.querySelector('#min');
             const maximumArea = document.querySelector('#max');
             const maximumOutput = document.querySelector('#maxOut');
             const ascendingButton = document.querySelector(`#asc`);
             const descendingButton = document.querySelector(`#desc`);
-            const onButton = document.querySelector(`#on`);
-            const offButton = document.querySelector(`#off`);
+            const onButtonProvince = document.querySelector(`#onProvince`);
+            const offButtonProvince = document.querySelector(`#offProvince`);
+            const onButtonRegion = document.querySelector(`#onRegion`);
+            const offButtonRegion = document.querySelector(`#offRegion`);
             const datasDiv = document.querySelector('#datas');
+            let resultCount = 0;    
             let modal = false;
             let provinceOrRegion = 'province'
             let ascOrDesc = 'asc'
-            let onOrOff = 'off'
+            let onOrOffProvince = 'off'
+            let onOrOffRegion = 'off'
             let datas = [];
             //reactiveLike functions
             // show or hide modal
@@ -198,16 +224,28 @@
                     ascendingButton.classList.remove('toggle');
                 }
             }
-            function onOrOffUpdate() {
-                if (onOrOff === 'on') {
-                    searchForm['showOneProvince'] = onOrOff;
-                    onButton.classList.add('toggle');
-                    offButton.classList.remove('toggle');
+            function onOrOffProvinceUpdate() {
+                if (onOrOffProvince === 'on') {
+                    searchForm['showOneProvince'] = onOrOffProvince;
+                    onButtonProvince.classList.add('toggle');
+                    offButtonProvince.classList.remove('toggle');
                 }
                 else {
-                    searchForm['showOneProvince'] = onOrOff;
-                    offButton.classList.add('toggle');
-                    onButton.classList.remove('toggle');
+                    searchForm['showOneProvince'] = onOrOffProvince;
+                    offButtonProvince.classList.add('toggle');
+                    onButtonProvince.classList.remove('toggle');
+                }
+            }
+            function onOrOffRegionUpdate() {
+                if (onOrOffRegion === 'on') {
+                    searchForm['showOneRegion'] = onOrOffRegion;
+                    onButtonRegion.classList.add('toggle');
+                    offButtonRegion.classList.remove('toggle');
+                }
+                else {
+                    searchForm['showOneRegion'] = onOrOffRegion;
+                    offButtonRegion.classList.add('toggle');
+                    onButtonRegion.classList.remove('toggle');
                 }
             }
             //Query pipeline for url filters
@@ -272,6 +310,7 @@
                 while(datasDiv.firstChild) {
                     datasDiv.removeChild(datasDiv.firstChild);
                 }
+                datasDiv.appendChild(createResults(resultCount));
                 datas.forEach(data => {
                     datasDiv.appendChild(createCard(data));
                 })
@@ -290,6 +329,7 @@
                 console.log(url);
                 const response = await fetch(url);
                 const data = await response.json();
+                resultCount = data.numberReturned;
                 const structuredData = data.features.map(feature => {
                     const {longitude,latitude} = getCentroid(feature.geometry.coordinates[0][0]);
                     return {
@@ -303,7 +343,9 @@
                         latitude
                     }
                 });
+                let inPipeline = false;
                 if (searchForm.showOneProvince === 'on') {
+                    inPipeline = true;
                     const provincesArray = structuredData.map(location => {
                         return location.province;
                     });
@@ -315,7 +357,20 @@
                         }
                     }).filter(location => location !== undefined);
                 }
-                else {
+                if (searchForm.showOneRegion === 'on') {
+                    inPipeline = true;
+                    const regionsArray = structuredData.map(location => {
+                        return location.region;
+                    });
+                    const regionsArraySet = [...new Set(regionsArray)];
+                    datas = structuredData.map(location => {
+                        if (regionsArraySet.includes(location.region)) {
+                            regionsArraySet.splice(regionsArraySet.indexOf(location.region),1);
+                            return location;
+                        }
+                    }).filter(location => location !== undefined);
+                }
+                if (!inPipeline) {
                     datas = structuredData;
                 }
                 console.log(datas);
@@ -330,7 +385,7 @@
                 provinceOrRegion = 'province';
                 ProvinceOrRegionUpdate();
             });
-            regionButton.addEventListener('click', () => {
+            regionButtonProvince.addEventListener('click', () => {
                 provinceOrRegion = 'region';
                 ProvinceOrRegionUpdate();
             });
@@ -362,21 +417,31 @@
                 ascOrDescUpdate();
                 console.log(searchForm);
             })
-            onButton.addEventListener('click',() => {
-                onOrOff = 'on';
-                onOrOffUpdate();
+            onButtonProvince.addEventListener('click',() => {
+                onOrOffProvince = 'on';
+                onOrOffProvinceUpdate();
                 console.log(searchForm);
             })
-            offButton.addEventListener('click',() => {
-                onOrOff = 'off';
-                onOrOffUpdate();
+            offButtonProvince.addEventListener('click',() => {
+                onOrOffProvince = 'off';
+                onOrOffProvinceUpdate();
+                console.log(searchForm);
+            })
+            onButtonRegion.addEventListener('click',() => {
+                onOrOffRegion = 'on';
+                onOrOffRegionUpdate();
+                console.log(searchForm);
+            })
+            offButtonRegion.addEventListener('click',() => {
+                onOrOffRegion = 'off';
+                onOrOffRegionUpdate();
                 console.log(searchForm);
             })
             updateModal();
             ProvinceOrRegionUpdate();
             ascOrDescUpdate();
-            onOrOffUpdate();
-
+            onOrOffProvinceUpdate();
+            onOrOffRegionUpdate();
             //Testing
             // setTimeout(() => {
             //     modal = false;
@@ -449,7 +514,7 @@
                                 </div> 
                             </div>
                             <p class="text-center font-bold text-xl py-2">Maximum Output</p>
-                            <input id="maxOut" class="text-center w-full h-[50px] border-2 font-bold rounded-xl drop-shadow-sm pl-8 pr-4 focus:outline-none focus:outline-2 focus:outline-green-500" placeholder="Max Output" type="number" value="50">
+                            <input id="maxOut" class="text-center w-full h-[50px] border-2 font-bold rounded-xl drop-shadow-sm pl-8 pr-4 focus:outline-none focus:outline-2 focus:outline-green-500" placeholder="Max Output" type="number" value="50" max="10667">
                             <p class="text-center font-bold text-xl py-2">Order By Area</p>
                             <div class="flex gap-2 mb-2">
                                 <button id="asc" class="text-lg sm:text-2xl font-bold flex-1 basis-0 border-2 px-4 py-2 rounded-full flex justify-center items-center">
@@ -463,14 +528,25 @@
                             </div>
                             <p class="text-center font-bold text-xl py-2">Show one Province</p>
                             <div class="flex gap-2 mb-2">
-                                <button id="on" class="text-lg sm:text-2xl font-bold flex-1 basis-0 border-2 px-4 py-2 rounded-full flex justify-center items-center">
+                                <button id="onProvince" class="text-lg sm:text-2xl font-bold flex-1 basis-0 border-2 px-4 py-2 rounded-full flex justify-center items-center">
                                     <span class="material-symbols-outlined">toggle_on</span>
                                     On
                                 </button>
-                                <button id="off" class="text-lg sm:text-2xl  font-bold flex-1 basis-0 border-2 px-4 py-2 rounded-full flex justify-center items-center">
+                                <button id="offProvince" class="text-lg sm:text-2xl  font-bold flex-1 basis-0 border-2 px-4 py-2 rounded-full flex justify-center items-center">
                                     <span class="material-symbols-outlined">toggle_off</span>
                                     Off
-                                </button> 
+                                </button>
+                            </div>
+                            <p class="text-center font-bold text-xl py-2">Show one Region</p>
+                            <div class="flex gap-2 mb-2">
+                                <button id="onRegion" class="text-lg sm:text-2xl font-bold flex-1 basis-0 border-2 px-4 py-2 rounded-full flex justify-center items-center">
+                                    <span class="material-symbols-outlined">toggle_on</span>
+                                    On
+                                </button>
+                                <button id="offRegion" class="text-lg sm:text-2xl  font-bold flex-1 basis-0 border-2 px-4 py-2 rounded-full flex justify-center items-center">
+                                    <span class="material-symbols-outlined">toggle_off</span>
+                                    Off
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -481,6 +557,10 @@
             </div>
             <div id="datas" class="mt-12 px-4">
                 <!-- Template -->
+                <!-- <div class="flex gap-2 items-baseline text-xl font-bold">
+                    <p>Results: </p>
+                    <p class="font-medium" id="resultsCount">5</p>
+                </div> -->
                 <!-- <div class=" mb-4">
                     <div class="flex justify-center">
                         <div class=" w-[800px] shadow-md flex md:flex-row flex-col rounded-xl overflow-hidden">
