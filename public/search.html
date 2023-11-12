@@ -17,6 +17,7 @@
     <script src="https://unpkg.com/infinite-scroll@4/dist/infinite-scroll.pkgd.js"></script>
     <script defer>
         document.addEventListener('DOMContentLoaded',async () => {
+            //generates template
             function createResults(count) {
                 // Create the main container div
                 var container = document.createElement("div");
@@ -179,6 +180,8 @@
             const onButtonRegion = document.querySelector(`#onRegion`);
             const offButtonRegion = document.querySelector(`#offRegion`);
             const datasDiv = document.querySelector('#datas');
+
+            //initial Data
             let resultCount = 0;    
             let modal = false;
             let provinceOrRegion = 'province'
@@ -186,8 +189,9 @@
             let onOrOffProvince = 'off'
             let onOrOffRegion = 'off'
             let datas = [];
+
+
             //reactiveLike functions
-            // show or hide modal
             function updateModal() {
                 if (modal) {
                 modalDiv.classList.remove('hidden'); 
@@ -315,7 +319,7 @@
                     datasDiv.appendChild(createCard(data));
                 })
             }
-            //Search function with applied pipelined filters
+            //Search function with applied multi pipeline filters
             async function search() {
                 let url = "http://localhost:8080/geoserver/ITE-18-WEBGIS/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=ITE-18-WEBGIS:Mangrove_Philippines_DMA-4326&outputFormat=application/json";
                 // url += '&startIndex=1&maxFeatures=50'

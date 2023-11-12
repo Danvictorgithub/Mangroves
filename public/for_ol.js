@@ -1,5 +1,6 @@
 
 ////////////////////////////////////////////////////////////////////
+//checks if there is query latitude and longitude then specify zoom location
 const currentLocation = new URL(window.location.toLocaleString());
 const latitude = currentLocation.searchParams.get("lat");
 const longitude = currentLocation.searchParams.get("long");
@@ -26,6 +27,7 @@ const REGIONS = {
 var mapView = new ol.View({
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //Added feature to redirect to map from home or search page
+    //automatically changes center and zoom level if query are specified:lat,long
     center: ol.proj.fromLonLat((longitude && latitude)? [longitude,latitude]:[125.568014,8.890400]),
     zoom: (longitude &&latitude)?19.2:15,
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -79,10 +81,11 @@ map.addLayer(baseGroup)
 //     })
 // })
 // map.addLayer(add_butuan)
+//Initializing the Tile of our project layer
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 var add_mangroves = new ol.layer.Tile({
     title:'Mangroves',
-    opacity:0.5,
+    opacity:0.5, //here is the required opacity for the project layer
     source:new ol.source.TileWMS({
         url: 'http://localhost:8080/geoserver/ITE-18-WEBGIS/wms',
         params:{
@@ -110,7 +113,7 @@ map.addControl(layerSwitcher);
 
 var mousePosition = new ol.control.MousePosition({
     className: 'mousePosition',
-    projection: 'EPSG:4326',
+    projection: 'EPSG:4326', //very crucial in the manualFeatureInfo function otherwise it will not correctly identifies the coordinates projection
     coordinateFormat: function(coordinate){return ol.coordinate.format(coordinate, '{y},{x}', 6);}
 });
 map.addControl(mousePosition);
@@ -167,6 +170,7 @@ closer.onclick = function(){
 //     }
 // })
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Added manual so it can be called virtually in the script below
 function manualFeatureInfo(longitude,latitude) {
   if (featureInfoFlag) { 
     content.innerHTML = '';
@@ -228,6 +232,8 @@ function manualFeatureInfo(longitude,latitude) {
     }
   }
 }
+//modified to fit our wfs api
+/////////////////////////////////////////////////////////////////////////////////////////
 map.on('singleclick', function(e){
   console.log(e.coordinate);
     if (featureInfoFlag) { 
@@ -294,7 +300,9 @@ map.on('singleclick', function(e){
 
 
 var homeButton = document.createElement('button');
-homeButton.innerHTML = '<span class="material-symbols-outlined">home_pin</span>';
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+homeButton.innerHTML = '<span class="material-symbols-outlined">home_pin</span>'; //Edited styles
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 homeButton.className = 'myButton';
 
 var homeElement = document.createElement('div');
@@ -339,7 +347,9 @@ fsButton.addEventListener("click", () => {
 map.addControl(fsControl);
 
 var featureInfoButton = document.createElement('button');
-featureInfoButton.innerHTML = '<span class="material-symbols-outlined">travel_explore</span>';
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+featureInfoButton.innerHTML = '<span class="material-symbols-outlined">travel_explore</span>';//Edited styles
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 featureInfoButton.className = 'myButton'
 featureInfoButton.id = 'featureInfoButton';
 
@@ -361,7 +371,9 @@ map.addControl(featureInfoControl);
 
 //start of length control
 var lengthButton = document.createElement("button");
-lengthButton.innerHTML = '<span class="material-symbols-outlined">straighten</span>';
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+lengthButton.innerHTML = '<span class="material-symbols-outlined">straighten</span>';//Edited styles
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 lengthButton.className = "myButton";
 lengthButton.id = "lengthButton";
 
@@ -395,7 +407,9 @@ map.addControl(lengthControl);
 
 //start of areaControl
     var areaButton = document.createElement('button');
-    areaButton.innerHTML = '<span class="material-symbols-outlined">square_foot</span>';
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    areaButton.innerHTML = '<span class="material-symbols-outlined">square_foot</span>';//Edited styles
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     areaButton.className = 'myButton';
     areaButton.id = 'areaButton';
 
@@ -434,7 +448,9 @@ zoomInInteraction.on('boxend',function(){
 });
 
 var ziButton = document.createElement('button');
-ziButton.innerHTML = '<span class="material-symbols-outlined">zoom_in</span>';
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+ziButton.innerHTML = '<span class="material-symbols-outlined">zoom_in</span>';//Edited styles
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ziButton.className = 'myButton';
 ziButton.id ='ziButton';
 
@@ -471,7 +487,9 @@ zoomOutInteraction.on('boxend',function(){
 })
 
 var zoButton = document.createElement('button');
-zoButton.innerHTML = '<span class="material-symbols-outlined">zoom_out</span>';
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+zoButton.innerHTML = '<span class="material-symbols-outlined">zoom_out</span>';//Edited styles
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 zoButton.className = 'myButton';
 zoButton.id = 'zoButton';
 
@@ -1071,6 +1089,7 @@ function addMapLayerList() {
     }
   }
   //end of attribute query control
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   if (longitude && latitude) {
     featureInfoButton.click();
     // I found out that I need to convert the coordinates to EPSG:3857 or else it will not work
@@ -1079,4 +1098,5 @@ function addMapLayerList() {
     manualFeatureInfo(...geojsonCoordinates);
     console.log("this is called");
   }
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
