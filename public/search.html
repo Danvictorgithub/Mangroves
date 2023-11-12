@@ -137,7 +137,8 @@
                     max: ''
                 },
                 maxOutput: 50,
-                orderBy: 'asc'
+                orderBy: 'asc',
+                showOneProvince:'off'
             }
             const modalDiv = document.querySelector('#modal');
             const modalButton = document.querySelector('#modalButton');
@@ -151,11 +152,13 @@
             const maximumOutput = document.querySelector('#maxOut');
             const ascendingButton = document.querySelector(`#asc`);
             const descendingButton = document.querySelector(`#desc`);
+            const onButton = document.querySelector(`#on`);
+            const offButton = document.querySelector(`#off`);
             const datasDiv = document.querySelector('#datas');
             let modal = false;
             let provinceOrRegion = 'province'
             let ascOrDesc = 'asc'
-
+            let onOrOff = 'off'
             let datas = [];
             //reactiveLike functions
             // show or hide modal
@@ -193,6 +196,18 @@
                     searchForm['orderBy'] = ascOrDesc;
                     descendingButton.classList.add('toggle');
                     ascendingButton.classList.remove('toggle');
+                }
+            }
+            function onOrOffUpdate() {
+                if (onOrOff === 'on') {
+                    searchForm['showOneProvince'] = onOrOff;
+                    onButton.classList.add('toggle');
+                    offButton.classList.remove('toggle');
+                }
+                else {
+                    searchForm['showOneProvince'] = onOrOff;
+                    offButton.classList.add('toggle');
+                    onButton.classList.remove('toggle');
                 }
             }
             //Query pipeline for url filters
@@ -288,7 +303,21 @@
                         latitude
                     }
                 });
-                datas = structuredData;
+                if (searchForm.showOneProvince === 'on') {
+                    const provincesArray = structuredData.map(location => {
+                        return location.province;
+                    });
+                    const provincesArraySet = [...new Set(provincesArray)];
+                    datas = structuredData.map(location => {
+                        if (provincesArraySet.includes(location.province)) {
+                            provincesArraySet.splice(provincesArraySet.indexOf(location.province),1);
+                            return location;
+                        }
+                    }).filter(location => location !== undefined);
+                }
+                else {
+                    datas = structuredData;
+                }
                 console.log(datas);
                 updateDatasDiv();
             }
@@ -333,10 +362,20 @@
                 ascOrDescUpdate();
                 console.log(searchForm);
             })
+            onButton.addEventListener('click',() => {
+                onOrOff = 'on';
+                onOrOffUpdate();
+                console.log(searchForm);
+            })
+            offButton.addEventListener('click',() => {
+                onOrOff = 'off';
+                onOrOffUpdate();
+                console.log(searchForm);
+            })
             updateModal();
             ProvinceOrRegionUpdate();
             ascOrDescUpdate();
-
+            onOrOffUpdate();
 
             //Testing
             // setTimeout(() => {
@@ -421,6 +460,17 @@
                                     <span class="material-symbols-outlined">trending_down</span>
                                     Descending
                                 </button>
+                            </div>
+                            <p class="text-center font-bold text-xl py-2">Show one Province</p>
+                            <div class="flex gap-2 mb-2">
+                                <button id="on" class="text-lg sm:text-2xl font-bold flex-1 basis-0 border-2 px-4 py-2 rounded-full flex justify-center items-center">
+                                    <span class="material-symbols-outlined">toggle_on</span>
+                                    On
+                                </button>
+                                <button id="off" class="text-lg sm:text-2xl  font-bold flex-1 basis-0 border-2 px-4 py-2 rounded-full flex justify-center items-center">
+                                    <span class="material-symbols-outlined">toggle_off</span>
+                                    Off
+                                </button> 
                             </div>
                         </div>
                     </div>
