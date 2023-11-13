@@ -1090,6 +1090,7 @@ function addMapLayerList() {
   }
   //end of attribute query control
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //mimics user using featureInfo function  
   if (longitude && latitude) {
     featureInfoButton.click();
     // I found out that I need to convert the coordinates to EPSG:3857 or else it will not work
